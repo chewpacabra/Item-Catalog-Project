@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
+from flask import Flask, render_template, request
+from flask import redirect, jsonify, url_for, flash
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
 from db_setup import Base, User, Employee, Team
@@ -14,13 +15,15 @@ import requests
 
 app = Flask(__name__)
 
-CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
+CLIENT_ID = json.loads(
+    open('client_secrets.json', 'r').read())['web']['client_id']
 
 engine = create_engine('sqlite:///assets.db')
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+
 
 # Create anti-forgery state token
 @app.route('/login')
@@ -84,8 +87,8 @@ def gconnect():
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_access_token is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is already connected.'),
-                                 200)
+        response = make_response(
+            json.dumps('Current user is already connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -118,10 +121,12 @@ def gconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    output += ' " style = "width: 300px;height: 300px;border-radius: 150px;'
+    output += '-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
     print "done!"
     return output
+
 
 @app.route('/gdisconnect')
 def gdisconnect():
@@ -145,161 +150,192 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
     else:
-        response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+        response = make_response(
+            json.dumps('Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'
         return response
 
 # Functions to help with user credentials
 
+
 def createUser(login_session):
-    newUser = User(name = login_session['username'], email = login_session['email'], picture = login_session['picture'])
+    newUser = User(
+        name=login_session['username'],
+        email=login_session['email'], picture=login_session['picture'])
     session.add(newUser)
     session.commit()
-    user = session.query(User).filter_by(email = login_session['email']).one()
+    user = session.query(User).filter_by(email=login_session['email']).one()
     return user.id
 
+
 def getUserInfo(user_id):
-    user = session.query(User).filter_by(id = user_id).one()
+    user = session.query(User).filter_by(id=user_id).one()
     return user
 
 
 def getUserID(email):
     try:
-        user = session.query(User).filter_by(email = email).one()
+        user = session.query(User).filter_by(email=email).one()
         return user.id
     except:
         return None
 
+
 # API Endpoints
 @app.route('/team/<int:team_id>/JSON/')
 def getTeamJSON(team_id):
-	team = session.query(Employee).filter_by(team_id = team_id).all()
-	return jsonify(Team = [i.serialize for i in team])
+    team = session.query(Employee).filter_by(team_id=team_id).all()
+    return jsonify(Team=[i.serialize for i in team])
+
 
 @app.route('/team/<int:team_id>/employee/<int:employee_id>/JSON')
 def getEmployeeJSON(team_id, employee_id):
-	employee = session.query(Employee).filter_by(id = employee_id).one()
-	return jsonify(employee = employee.serialize)
+    employee = session.query(Employee).filter_by(id=employee_id).one()
+    return jsonify(employee=employee.serialize)
+
 
 @app.route('/team/JSON')
 def getTeamsJSON():
-	teams = session.query(Team).all()
-	return jsonify(teams = [i.serialize for i in teams])
+    teams = session.query(Team).all()
+    return jsonify(teams=[i.serialize for i in teams])
+
 
 @app.route('/users/JSON')
 def getUsersJSON():
-	team = session.query(User).all()
-	return jsonify(users = [i.serialize for i in team])
+    team = session.query(User).all()
+    return jsonify(users=[i.serialize for i in team])
 
 
 # Route for displaying teams / default page
 @app.route('/')
 @app.route('/teams')
 def getRequestDefault():
-	manager = session.query(Team)
-	if 'username' not in login_session:
-		return render_template('publicteams.html', manager = manager)
-	else:
-		return render_template('teams.html', manager = manager)
+    manager = session.query(Team)
+    if 'username' not in login_session:
+        return render_template('publicteams.html', manager=manager)
+    else:
+        return render_template('teams.html', manager=manager)
+
 
 # Route for displaying employees on a team
 @app.route('/team/<int:team_id>/')
 def getTeam(team_id):
-	team = session.query(Team).filter_by(id = team_id).one()
-	creator = getUserInfo(team.user_id)
-	employees = session.query(Employee).filter_by(team_id = team_id).filter_by(level = 0).all()
-	if 'username' not in login_session or creator.id != login_session['user_id']:
-		return render_template('publicemployees.html', employees = employees, team_id = team_id)
-	else:
-		return render_template('employees.html', employees = employees, team_id = team_id)
+    team = session.query(Team).filter_by(id=team_id).one()
+    creator = getUserInfo(team.user_id)
+    employees = session.query(
+       Employee).filter_by(team_id=team_id).filter_by(level=0).all()
+    if 'username' not in login_session or creator.id != login_session['user_id']:
+        return render_template(
+            'publicemployees.html', employees=employees, team_id=team_id)
+    else:
+        return render_template(
+            'employees.html', employees=employees, team_id=team_id)
+
 
 # Route for creating a new team
-@app.route('/team/new', methods = ['GET', 'POST'])
+@app.route('/team/new', methods=['GET', 'POST'])
 def newTeam():
-	if 'username' not in login_session:
-		return redirect('/login')
- 	if request.method == 'POST':
-	    newTeam = Team(name = request.form['name'], user_id = login_session['user_id'])
-	    session.add(newTeam)
-	    flash('New Restaurant %s Successfully Created' % newTeam.name)
-	    session.commit()
-	    return redirect('/')
-	else:
-	    return render_template('newTeam.html')
+    if 'username' not in login_session:
+        return redirect('/login')
+    if request.method == 'POST':
+        newTeam = Team(
+            name=request.form['name'], user_id=login_session['user_id'])
+        session.add(newTeam)
+        flash('New Restaurant %s Successfully Created' % newTeam.name)
+        session.commit()
+        return redirect('/')
+    else:
+        return render_template('newTeam.html')
+
 
 # Route for creating a new employee
-@app.route('/team/<int:team_id>/newEmployee', methods = ['GET', 'POST'])
+@app.route('/team/<int:team_id>/newEmployee', methods=['GET', 'POST'])
 def newEmployee(team_id):
-	if 'username' not in login_session:
-		return redirect('/login')
-	if request.method == 'POST':
-		newEmployee = Employee(name = request.form['name'], team_id = team_id, level = 0)
-		#user_id = login_session['user_id']
-		session.add(newEmployee)
-		session.commit()
-		return redirect(url_for('getTeam', team_id = team_id))
-	else:
-		return render_template('newEmployee.html', team_id = team_id)
-	return "page to create add a new employee to hierarchy."
+    if 'username' not in login_session:
+        return redirect('/login')
+    if request.method == 'POST':
+        newEmployee = Employee(
+            name=request.form['name'], team_id=team_id, level=0)
+        session.add(newEmployee)
+        session.commit()
+        return redirect(url_for('getTeam', team_id=team_id))
+    else:
+        return render_template('newEmployee.html', team_id=team_id)
+    return "page to create add a new employee to hierarchy."
+
 
 # Route for editing a team
-@app.route('/team/<int:team_id>/edit', methods = ['GET', 'POST'])
+@app.route('/team/<int:team_id>/edit', methods=['GET', 'POST'])
 def editTeam(team_id):
-	if 'username' not in login_session:
-		return redirect('/login')
-	editedTeam = session.query(Team).filter_by(id = team_id).one()
-	if request.method == 'POST':
-		if request.form['name']:
-			editedTeam.name = request.form['name']
-		session.add(editedTeam)
-		session.commit()
-		return redirect('/')
-	else:
-		return render_template('editTeam.html', team_id = team_id, editedTeam = editedTeam)
+    if 'username' not in login_session:
+        return redirect('/login')
+    editedTeam = session.query(Team).filter_by(id=team_id).one()
+    if editedTeam.user_id != login_session['user_id']:
+        return "<script>function myFunction() {alert('You are not authorized to edit this team.');}</script><body onload='myFunction()''>"
+    if request.method == 'POST':
+        if request.form['name']:
+            editedTeam.name = request.form['name']
+        session.add(editedTeam)
+        session.commit()
+        return redirect('/')
+    else:
+        return render_template(
+            'editTeam.html', team_id=team_id, editedTeam=editedTeam)
+
 
 # Route to edit an employee
-@app.route('/team/<int:team_id>/employee/<int:employee_id>/edit', methods = ['GET', 'POST'])
+@app.route('/team/<int:team_id>/employee/<int:employee_id>/edit', methods=['GET', 'POST'])
 def editEmployee(team_id, employee_id):
-	if 'username' not in login_session:
-		return redirect('/login')
-	editedEmployee = session.query(Employee).filter_by(id = employee_id).one()
-	if request.method == 'POST':
-		if request.form['name']:
-			editedEmployee.name = request.form['name']
-		session.add(editedEmployee)
-		session.commit()
-		return redirect(url_for('getTeam', team_id = team_id))
-	else:
-		return render_template('editEmployee.html', team_id = team_id, employee_id = employee_id)
+    if 'username' not in login_session:
+        return redirect('/login')
+    editedEmployee = session.query(Employee).filter_by(id=employee_id).one()
+    if editedEmployee.user_id != login_session['user_id']:
+        return "<script>function myFunction() {alert('You are not authorized to edit this employee.');}</script><body onload='myFunction()''>"
+    if request.method == 'POST':
+        if request.form['name']:
+            editedEmployee.name = request.form['name']
+        session.add(editedEmployee)
+        session.commit()
+        return redirect(url_for('getTeam', team_id=team_id))
+    else:
+        return render_template(
+            'editEmployee.html', team_id=team_id, employee_id=employee_id)
+
 
 # Route to delete a team
-@app.route('/team/<int:team_id>/delete', methods = ['GET', 'POST'])
+@app.route('/team/<int:team_id>/delete', methods=['GET', 'POST'])
 def deleteTeam(team_id):
-	if 'username' not in login_session:
-		return redirect('/login')
-	teamToDelete = session.query(Team).filter_by(id = team_id).one()
-	if request.method == 'POST':
-		session.delete(teamToDelete)
-		session.commit()
-		return redirect('/teams')
-	else:
-		return render_template('deleteTeam.html', team_id = team_id, teamToDelete = teamToDelete)
+    if 'username' not in login_session:
+        return redirect('/login')
+    teamToDelete = session.query(Team).filter_by(id=team_id).one()
+    if teamToDelete.user_id != login_session['user_id']:
+        return "<script>function myFunction() {alert('You are not authorized to delete this team.');}</script><body onload='myFunction()''>"
+    if request.method == 'POST':
+        session.delete(teamToDelete)
+        session.commit()
+        return redirect('/teams')
+    else:
+        return render_template(
+            'deleteTeam.html', team_id=team_id, teamToDelete=teamToDelete)
 
 
 # Route to delete an existing employee
-@app.route('/team/<int:team_id>/employee/<int:employee_id>/delete', methods = ['GET', 'POST'])
+@app.route('/team/<int:team_id>/employee/<int:employee_id>/delete', methods=['GET', 'POST'])
 def deleteEmployee(team_id, employee_id):
-	if 'username' not in login_session:
-		return redirect('/login')
-	employeeToDelete = session.query(Employee).filter_by(id = employee_id).one()
-	if request.method == 'POST':
-		session.delete(employeeToDelete)
-		session.commit()
-		return redirect(url_for('getTeam', team_id = team_id))
-	else:
-		return render_template('deleteEmployee.html', team_id = team_id, employee_id = employee_id, employeeToDelete = employeeToDelete)
+    if 'username' not in login_session:
+        return redirect('/login')
+    employeeToDelete = session.query(Employee).filter_by(id=employee_id).one()
+    if employeeToDelete.user_id != login_session['user_id']:
+        return "<script>function myFunction() {alert('You are not authorized to delete this employee.');}</script><body onload='myFunction()''>"
+    if request.method == 'POST':
+        session.delete(employeeToDelete)
+        session.commit()
+        return redirect(url_for('getTeam', team_id=team_id))
+    else:
+        return render_template(
+            'deleteEmployee.html', team_id=team_id, employee_id=employee_id, employeeToDelete=employeeToDelete)
 
 if __name__ == '__main__':
-	app.secret_key = 'super_secret_key'
-	app.debug = True
-	app.run(host='0.0.0.0', port=5000)
+    app.secret_key = 'super_secret_key'
+    app.debug = True
+    app.run(host='0.0.0.0', port=5000)

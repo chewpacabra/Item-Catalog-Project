@@ -43,47 +43,47 @@ session.commit()
 
 # Add Employees
 
-employee2 = Employee(name = "Robert Brenner", team_id = 1, level = 1)
+employee2 = Employee(name = "Robert Brenner", team_id = 1, level = 1, user_id = 1)
 
 session.add(employee2)
 session.commit()
 
-employee3 = Employee(name = "Alfonso Saucedo", team_id = 2, level = 1)
+employee3 = Employee(name = "Alfonso Saucedo", team_id = 2, level = 1, user_id = 2)
 
 session.add(employee3)
 session.commit()
 
-employee4 = Employee(name = "Dyllon Barge", team_id = 2, level = 0)
+employee4 = Employee(name = "Dyllon Barge", team_id = 2, level = 0, user_id = 2)
 
 session.add(employee4)
 session.commit()
 
-employee5 = Employee(name = "Carlos Carreon", team_id = 2, level = 0)
+employee5 = Employee(name = "Carlos Carreon", team_id = 2, level = 0, user_id = 2)
 
 session.add(employee5)
 session.commit()
 
-employee6 = Employee(name = "Cory Conley", team_id = 2, level = 0)
+employee6 = Employee(name = "Cory Conley", team_id = 2, level = 0, user_id = 2)
 
 session.add(employee6)
 session.commit()
 
-employee7 = Employee(name = "Darren Coker", team_id = 1, level = 0)
+employee7 = Employee(name = "Darren Coker", team_id = 1, level = 0, user_id = 1)
 
 session.add(employee7)
 session.commit()
 
-employee8 = Employee(name = "Rodrick Cross", team_id = 1, level = 0)
+employee8 = Employee(name = "Rodrick Cross", team_id = 1, level = 0, user_id = 1)
 
 session.add(employee8)
 session.commit()
 
-employee9 = Employee(name = "Luis Flores", team_id = 1, level = 0)
+employee9 = Employee(name = "Luis Flores", team_id = 1, level = 0, user_id = 1)
 
 session.add(employee9)
 session.commit()
 
-employee9 = Employee(name = "Matthew Bolton", team_id = 3, level = 1)
+employee9 = Employee(name = "Matthew Bolton", team_id = 3, level = 1, user_id = 1)
 
 session.add(employee9)
 session.commit()

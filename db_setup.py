@@ -51,6 +51,8 @@ class Employee(Base):
 	level = Column(Integer, nullable=True)
 	team_id = Column((Integer), ForeignKey('team.id'))
 	team = relationship(Team)
+	user_id = Column(Integer, ForeignKey('user.id'))
+	user = relationship(User)
 
 
 	@property
@@ -61,6 +63,7 @@ class Employee(Base):
 			'name': self.name,
 			'level': self.level,
 			'team_id': self.team_id,
+			'user_id': self.user_id,
 		}
 
 engine = create_engine('sqlite:///assets.db')
