@@ -24,6 +24,11 @@ user1 = User(name = "Robert Brenner", email = "rb3792@att.com")
 session.add(user1)
 session.commit()
 
+user2 = User(name = "Estevan Gonzalez", email = "egonza013@gmail.com")
+
+session.add(user2)
+session.commit()
+
 # Building teams
 
 team1 = Team(id = 1, name = "Brenner's Team", user_id = 1)
