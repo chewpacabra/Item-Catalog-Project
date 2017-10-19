@@ -31,17 +31,17 @@ session.commit()
 
 # Building teams
 
-team1 = Team(id = 1, name = "Brenner's Team", user_id = 1)
+team1 = Team(id = 2, name = "Brenner's Team", user_id = 1)
 
 session.add(team1)
 session.commit()
 
-team2 = Team(id = 2, name = "Fonso's Team", user_id = 2)
+team2 = Team(id = 3, name = "Fonso's Team", user_id = 2)
 
 session.add(team2)
 session.commit()
 
-team3 = Team(id = 3, name = "Matt's Team", user_id = 1)
+team3 = Team(id = 4, name = "Matt's Team", user_id = 1)
 
 session.add(team3)
 session.commit()
